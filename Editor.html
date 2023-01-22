@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Editor</title>
+	<link href="css/editor.css" rel="stylesheet" type="text/css"></link>
+	
+  </head>
+  <body>
+	<div class="menuButtonsSpace">
+
+		<button id="save" onclick="saveProyect()">Guardar Proyecto</button>
+		<button id="save" onclick="saveModule()">Guardar Pestaña</button>
+		<button id="load" onclick="loadProyect()">Abrir Proyecto</button>
+		<button id="save" onclick="loadModule">Importar Pestaña</button>
+		<button id="run" onclick="run()">Probar-></button>
+		<button id="run" onclick="build()">Crear</button>
+	</div>
+	<div id="cBSpace" class="codeButtonsSpace">
+
+	</div>
+	<div id="eSelectionArea" class="editionSelectionArea ">	</div>
+	<div id="writeCodeDiv" class="editionArea"> </div>
+	<textarea class="editionArea backEA" id="writeCode" oninput="saveCode();rewriteRitchCode();" onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}">
+	</textarea>
+
+	<div class="showArea">
+		<iframe id="resultCode"></iframe>
+	</div>
+
+	<script src="./js/tabs.js"></script>
+	<script src="./js/saveload.js"></script>
+	<script src="./js/constants.js"></script>
+	<script src="./js/kjaOpt.js"></script>
+	<script src="./js/jszip.min.js"></script>
+	<script src="./js/FileSaver.min.js"></script>
+	
+	<script>
+
+		let selTab = 0;
+		let nameBase = "SinNombre";
+		let msjBase = "/*Escribe tu código aquí ó usa las botoneras para que la magia comience*/";
+		codeSource = new Array();
+		codeSource.push([nameBase , msjBase]);
+		showTab();
+		createSelection(kjaOpt);
+
+		function htmlAppSource(){
+			let template_string = `<!DOCTYPE html>
+						<html>
+							<head>
+								<title>K-JA application<\/title>
+								<link href="css/app.css" rel="stylesheet" type="text/css">
+							<\/head>
+							<body>
+							<\/body>
+							<script src="./js/constants.js"><\/script>
+							<script src="./js/mbox.js"><\/script>
+
+							<script> try{{{appSource}}}catch(e){alert(e);};	<\/script>	
+						<\/html>`;
+		
+		
+			let appSource="";
+			if (codeSource.length > 0){
+				for (let i = 0; i < codeSource.length; i++) {
+					appSource += codeSource[i][1];
+				}
+			}
+			return template_string.replace('{{appSource}}', appSource);	
+		}
+		
+		function run(){
+			let html_string = htmlAppSource();
+			let iframeElement = document.getElementById("resultCode");
+			iframeElement.src = "about:blank";
+			iframeElement.contentWindow.document.open();
+			iframeElement.contentWindow.document.write(html_string);
+			iframeElement.contentWindow.document.close();
+		}
+
+		function saveProyect(){
+			let appSource = JSON.stringify({type:"Proyecto",appSource:codeSource});
+			save(appSource, "proyecto");
+		}
+
+		function saveModule(){
+			let appSource = JSON.stringify({type:"Modulo",appSource:codeSource[selTab]});
+			save(appSource, "módulo");
+		}
+		
+		function loadModule(){
+			var inputOpt = document.createElement("input");
+			inputOpt.type = "file";
+			document.body.appendChild(inputOpt);
+			inputOpt.style.display = 'none';
+			inputOpt.addEventListener("change", function() {
+				load(inputOpt.files[0],"Modulo");
+				inputOpt.parentNode.removeChild(inputOpt);
+			});
+			inputOpt.click() 
+		}
+		
+		function loadProyect(){
+			var inputOpt = document.createElement("input");
+			inputOpt.type = "file";
+			document.body.appendChild(inputOpt);
+			inputOpt.style.display = 'none';
+			inputOpt.addEventListener("change", function() {
+				load(inputOpt.files[0],"Proyecto");
+				inputOpt.parentNode.removeChild(inputOpt);
+			});
+			inputOpt.click() 
+		}
+		
+		function build(){
+			var zip = new JSZip();
+			// agregar el código HTML a la raíz del archivo zip
+			zip.file("app.html", htmlAppSource());
+			// crear una carpeta "css" y agregar los archivos CSS
+			
+			let cssContent;
+			let style = document.createElement("style");
+			style.innerHTML = "@import url('css/app.css');";
+			document.head.appendChild(style);
+			cssContent = style.innerHTML;
+			var cssFolder = zip.folder("css");
+			cssFolder.file("app.css", cssContent);
+			
+			let jsContent = {};
+			let scripts = document.getElementsByTagName("script");
+			for (let i = 0; i < scripts.length; i++) {
+				if (scripts[i].src.endsWith("constants.js")) {
+					jsContent.constants = scripts[i].innerHTML;
+				} else if (scripts[i].src.endsWith("mbox.js")) {
+					jsContent.mbox = scripts[i].innerHTML;
+				}
+			}
+			
+			let jsFolder = zip.folder("js");
+			// agregar los archivos javascript a la carpeta "js"
+			Object.keys(jsContent).forEach(function(key) {
+				jsFolder.file(key + '.js', jsContent[key]);
+			});
+
+
+			zip.generateAsync({ type: "blob" })
+			.then(function (content) {
+				// aqui debes incluir una referencia a una biblioteca externa para poder usar la función saveAs
+				saveAs(content, "pagina.zip");
+			});
+}
+
+	</script>
+  </body>
+</html>

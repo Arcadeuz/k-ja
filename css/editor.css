@@ -1,0 +1,123 @@
+.method{
+	color:Green;
+}
+.boxs{
+	color:Blue;
+}
+.text{
+	color:Grey;
+}
+
+.nums{
+	color:Pink;
+}
+
+.coms{
+	color:Teal;
+}
+.func{
+	background-color:LightCyan;
+}
+
+
+.menuButtonsSpace{
+	width:99vw;
+	height:3.5vh;
+}
+.codeButtonsSpace{
+	width:99vw;
+	height:3.5vh;
+}
+
+.editionArea{
+	width:calc(100vw - 100vh);
+	height:87vh ;
+	position:absolute;
+	top:11vh;
+	left:0vw;
+	background-color:transparent;
+	border:1px solid black;
+	font-family: Arial;
+	font-size:calc(2vh);
+}
+
+.backEA{
+	color: transparent;
+	caret-color: blue;
+}
+
+
+.editionSelectionArea{
+	width:calc(100vw - 100vh);
+	height:3vh;
+	position:absolute;
+	display: flex;
+	flex-direction: row;
+	top:8vh;
+	left:0vw;
+}
+
+.editionTab{
+	width: 5vw;
+	height:3vh;
+	font-size: calc(2vh);
+	float: left;
+    position: relative;
+	top:0%;
+	overflow:hidden;
+	background-color: Silver;
+	border-left: 1px solid black;
+	border-top: 1px solid black;
+	
+}
+
+.tabSelected{
+	top:-0.5vh !important;
+	height:3.5vh !important;
+	background-color: white !important;
+}
+
+.closeEditionTab{
+	width: 1vw;
+	height:3vh;
+	font-size: calc(1.5vh);
+	text-align:right;
+	color:red;
+	top:0%;
+	float: left;
+    position: relative;
+	background-color: Silver;
+	border-right: 1px solid black;
+	border-top: 1px solid black;
+}
+
+.addEditionTab{
+	width: 1vw;
+	height:3vh;
+	font-size: calc(3vh);
+	text-align:center;
+	top:0%;
+	float: left;
+    position: relative;
+	background-color: white;
+	border-right: 1px solid black;
+	border-top: 1px solid black;
+}
+
+.showArea{
+	width:90vh;
+	height:90vh;
+	position:absolute;
+	top:8vh;
+	left:calc(100vw - 95vh);
+}
+
+textarea{
+	width:100%;
+	height:100%;
+	resize: none;
+}
+iframe{
+	width:100%;
+	height:100%
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+	</head>
+	<body>
+		<div class="card" style="width: 20rem;">
+        <div class="card-body">
+          <h5 class="card-title">Visa</h5>
+          
+          <select id="Formulario" class="formbank" aria-label="Default select example">
+          </select>
+          <button class="botonBanco" type="button">Seleccionar</button>
+        </div>
+	</body>
+	<script src="colors.js"></script>
+	<script src="mboxEdit.js"></script>
+    <script>
+	
+	let c = new caja();
+
+for(let i in caja){
+	console.log(i);
+}
+
+	function mostrar_colores(){
+		for(let i in color){
+			document.getElementById("Formulario").innerHTML += "<option style='background-color:"+color[i]+";'value='" +color[i]+"'>"+i+"</option>";
+		}
+	}
+	mostrar_colores(); 
+	</script>
+</html>

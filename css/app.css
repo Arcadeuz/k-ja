@@ -1,0 +1,23 @@
+.contenedor{
+  width: 95vh;
+  height: 95vh;
+  position: relative;
+  border:1px solid #2eb9ce;
+  margin-left: calc((100vw - 95vh)/2);
+  overflow: hidden;
+}
+.caja{
+	color: red;
+	border:1px solid #2eb9ce;
+	position: absolute;
+}
+
+.grilla{ 
+    background: url("../img/grilla.png");
+	background-repeat: no-repeat;
+	background-size: contain;
+	opacity: 0.5;
+	}
+.name{color: red;}
+.value{color: blue;}
+.text{color: black;}
