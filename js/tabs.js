@@ -1,22 +1,80 @@
 
+var arrayCajas = [];
+var methCajas = arrayOfMethod(CajaExiste);
 
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+  lineNumbers: true,
+  mode: "javascript",
+  theme: "eclipse",
+  lineWrapping: true
+});
+var wrap = editor.getWrapperElement();
+wrap.style.height = "100%";
+editor.refresh();
+editor.on("change", function() { //esto tengo que coregir para que no sea cada vez que escibre
+    var code = editor.getValue();
+    arrayCajas = arrayOfBox(code);
+	
+});
+
+editor.addOverlay({
+    token: function(stream) {
+        for (var i = 0; i < arrayCajas.length; i++) {
+            if (stream.match(arrayCajas[i])) {
+                return "string-2";
+            } 
+        }
+        for (var i = 0; i < methCajas.length; i++) {
+            if (stream.match(methCajas[i])) {
+                return "string-3";
+            } 
+        }
+        while (stream.next() != null) {
+            for (var i = 0; i < arrayCajas.length; i++) {
+                if (stream.match(arrayCajas[i])) {
+                    return "string-2";
+                } 
+            }
+            for (var i = 0; i < methCajas.length; i++) {
+                if (stream.match(methCajas[i])) {
+                    return "string-3";
+                } 
+            }
+        }
+    }
+});
+
+editor.setOption("styleSelectedText", false);
+editor.setOption("theme", "default");
+editor.setOption("mode", "javascript");
+
+var string2 = editor.getWrapperElement().appendChild(document.createElement("style"));
+string2.innerHTML = ".cm-string-2 { color: blue; }";
+
+var string3 = editor.getWrapperElement().appendChild(document.createElement("style"));
+string3.innerHTML = ".cm-string-3 { color: green; }";
+
+
+
+
+var dontSave = false;
 function addTab(name = "", code = ""){
 	if (name == "") name = prompt('Ingrese el nombre del módulo')|| nameBase;
 	if (code == "") code = msjBase;
 	codeSource.push([name , code]);
-	selTab = codeSource.length - 1;
 	showTab();
 }
 
 function closeTab(i){
     if (confirm('si cierra '+codeSource[i][0]+' los cambios se perderán')){
-		(selTab >= i)? selTab = Math.max(0,selTab - 1):"";
 		codeSource.splice(i, 1);
-		showTab();
+		if(selTab == i)dontSave = true;
+		showTab()
+		//(selTab >= i)? showTab(true) : showTab();
 	}
 }
 
-function showTab(){
+function showTab(last = false){
 	document.getElementById("eSelectionArea").innerHTML = "";
 	if (codeSource.length > 0){
 		for (let i = 0; i < codeSource.length; i++) {
@@ -24,12 +82,27 @@ function showTab(){
 			document.getElementById("eSelectionArea").innerHTML += "<div onclick='closeTab("+i+");' id='clTab"+i+"' class='closeEditionTab'>(x)</div>";
 		}
 		document.getElementById("eSelectionArea").innerHTML += "<div onclick='addTab();' class='addEditionTab'>+</div>";
-		document.getElementById("writeCode").value = codeSource[selTab][1];
-		changeTab(selTab);
 	}else{
-		document.getElementById("eSelectionArea").innerHTML += "<div onclick='addTab();' class='addEditionTab'>+</div>";
+		alert("Se creará una nuevo mudulo");
+		deleteCode();
+		addTab();
 	}
+	changeTab(selTab);
+	//last? changeTab(-1): changeTab(selTab);
 }
+
+function changeTab(i){
+	saveCode();
+	selTab = Math.max(0,Math.min(codeSource.length - 1,i));
+	rewriteCode();
+	for (let j = 0; j < codeSource.length; j++) {
+		document.getElementById("chTab"+j).classList.remove("tabSelected");
+		document.getElementById("clTab"+j).classList.remove("tabSelected");
+	}
+		document.getElementById("chTab"+selTab).classList.add("tabSelected");
+		document.getElementById("clTab"+selTab).classList.add("tabSelected");
+}
+
 
 function tabsFromLoad(textFile,type){
 	loadSource = JSON.parse(textFile);
@@ -51,48 +124,30 @@ function tabFromLoadModule(loadCode){
 
 function tabsFromLoadProyect(loadCode){
 	codeSource = loadCode;
+	dontSave = true;
 	showTab();
 }
 
+function deleteCode(){
+	(codeSource.length > selTab)? codeSource[selTab][1] = msjBase: editor.setValue(msjBase);
+}
+
 function saveCode(){
-	codeSource[selTab][1] = document.getElementById("writeCode").value;
+	if(!dontSave){
+		codeSource[selTab][1] = editor.getValue()|| codeSource[selTab][1];
+	}else{
+		dontSave = false;
+	}
+	
 }
 
 function addCode(newCode){
-	var writeCode = document.getElementById("writeCode");
-	var v= writeCode.value;
-	var s= writeCode.selectionStart;
-	var e= writeCode.selectionEnd;
-	codeSource[selTab][1] = v.substring(0, s)+"\n"+newCode+v.substring(e);
-	rewriteCode();
-}
-
-function changeTab(i){
-	selTab = i;
-	rewriteCode();
-	for (let j = 0; j < codeSource.length; j++) {
-		document.getElementById("chTab"+j).classList.remove("tabSelected");
-		document.getElementById("clTab"+j).classList.remove("tabSelected");
-	}
-		document.getElementById("chTab"+i).classList.add("tabSelected");
-		document.getElementById("clTab"+i).classList.add("tabSelected");
+	editor.replaceRange(newCode + "\n" ,  editor.getCursor());
+	saveCode();
 }
 
 function rewriteCode(){
-	document.getElementById("writeCode").value = codeSource[selTab][1];
-	rewriteRitchCode();
-}
-
-function rewriteRitchCode(){
-	document.getElementById("writeCodeDiv").innerHTML = textToRitch(codeSource[selTab][1]);
-}
-
-function richToText(texto){
-		let erase = {"<a class='method'>":"","<a>":"","</a>":"","<p>":"","</p>":"","<div>":"","</div>":"","<br>":"","&nbsp;":""};
-		for(let i in erase){
-			texto = texto.split(i).join(erase[i]);
-		}
-	return texto
+	editor.setValue(codeSource[selTab][1]);
 }
 
 function textToRitch(texto){

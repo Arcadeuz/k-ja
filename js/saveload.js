@@ -2,8 +2,9 @@
 
 function save(textToWrite, type){
 	var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
-	var fileNameToSaveAs = prompt('Ingrese el nombre del '+type)|| "KJA"+type;
-
+	var fileNameToSaveAs = prompt('Ingrese el nombre del '+type, "KJA"+type);
+	if(!fileNameToSaveAs) return 0;
+	
 	var downloadLink = document.createElement("a");
 	downloadLink.download = fileNameToSaveAs;
 	downloadLink.innerHTML = "Download File";
